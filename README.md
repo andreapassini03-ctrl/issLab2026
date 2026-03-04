@@ -18,4 +18,6 @@
  * [ConwayLife Sprint3(ConwayLife/Sprint3/conway26Java): evoluzione del sistema in locale
    usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
 
+<a href=https://github.com/andreapassini03-ctrl/issLab2026/blob/main/docs/PASSINI%20ANDREA%200001243917.html>Template PASSINI ANDREA 0001243917</a>
+
 

@@ -273,12 +273,12 @@ public interface ICell {
 
 Cosa intende il committente con la parola Griglia?
 public interface IGrid {
-	  public int getRowsNum();
+	  public int getRowsNum(); //Per implementare getRowsNum devo conoscere com'è fatta internamente la griglia, ossia è primitiva.
 	  public int getColsNum();
-	  public void setCellValue(int x, int y, boolean state);
-	  public ICell getCell(int x, int y);
+	  public void setCellValue(int x, int y, boolean state); // Non è un metodo indispensabile, ma è molto comodo avere un metodo che mi permette di modificare lo stato di una cella.
+	  public ICell getCell(int x, int y); // è indispensabile avere un metodo che mi restituisce una cella.
 	  public boolean getCellValue(int x, int y);
-	  public void reset();
+	  public void reset(); //Non è indispensabile, ma può essere opportuno avere un metodo che resetta gli stati dei componenti della griglia, ossia le celle a un valore default, ad esempio tutte le celle morte.
 }
 </pre>
 
