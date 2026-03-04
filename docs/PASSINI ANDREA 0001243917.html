@@ -280,13 +280,7 @@ public interface IGrid {
 	  public boolean getCellValue(int x, int y);
 	  public void reset(); //Non è indispensabile, ma può essere opportuno avere un metodo che resetta gli stati dei componenti della griglia, ossia le celle a un valore default, ad esempio tutte le celle morte.
 }
-</pre>
 
-<h2>Problem analysis</h2>
-<img src="./img/Problem analysis.jpg" alt="id_img" width="40%" height="40%">
-
-<h2>Test plans</h2> 
-<pre>
 Test plan 1:
 
 public class CellTest {
@@ -368,8 +362,15 @@ private Grid grid;
 		grid.setCellValue(0,4,true);
 		//grid.printGrid();
 	}
-
 }
+
+</pre>
+
+<h2>Problem analysis</h2>
+<img src="./img/Problem analysis.jpg" alt="id_img" width="40%" height="40%">
+
+<h2>Test plans</h2> 
+<pre>
 
 </pre>
 
