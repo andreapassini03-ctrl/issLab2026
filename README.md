@@ -16,7 +16,7 @@
  ### Sistemi come servizi
  * ...
  ### Sistema ConwayLife con pagine HTML
- * [ConwayLife Sprint3](https://andreapassini03-ctrl.github.io/issLab2026/PASSINI%20ANDREA%200001243917.html): evoluzione del sistema in locale usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
+ * [ConwayLife Sprint3](https://andreapassini03-ctrl.github.io/issLab2026/Sprint3.html): evoluzione del sistema in locale usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
 
 
 
