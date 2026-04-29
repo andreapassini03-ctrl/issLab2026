@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.4/dist/css/foundation.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.4/dist/js/foundation.min.js" crossorigin="anonymous"></script> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="custom.css">
+    <title>PASSINI ANDREA - Firefly Sync Analysis</title>
+</head>
+
+<body>
+<div id="top">
+    <h1>LABORATORIO DI INGEGNERIA DEI SISTEMI SOFTWARE</h1>
+    <h3>Analisi del Sistema Firefly</h3>
+</div>  
+
+<div class="body"> 
+    <h2>Introduction</h2>
+    <p><b>Goal</b>: Analisi e modellazione di un sistema distribuito che simula il comportamento biologico delle lucciole, focalizzandosi sulla sincronizzazione emergente indotta da un coordinatore esterno.</p>
+
+    <h2>Requirements</h2>
+    <div class="info-box">
+        Definire un modello qak di un sistema firefly che simula il comportamento di una lucciola.
+    </div>
+    <p>In particolare, il sistema deve prevedere:</p>
+    <ul>
+        <li>La presenza di 3 lucciole indipendenti.</li>
+        <li>Modo di visualizzazione lo stato su una griglia.</li>
+    </ul>
+
+    <h2>Requirement analysis</h2>
+    <p>Dall'analisi del testo del requisito si evince che:</p>
+    <pre>
+- <b>Sistema firefly</b>: Un modello basato su attori (QAK).
+- <b>Lucciola</b>: Un'entità che deve mostrare un comportamento ciclico di lampeggio.
+- <b>Simulazione</b>: La necessità di riprodurre digitalmente un fenomeno naturale di coordinazione.
+    </pre>
+
+    <h2>Problem analysis</h2>
+    <p>In questa fase analizziamo il <b>come</b> il sistema debba operare per soddisfare i requisiti, definendo le interazioni e la logica temporale.</p>
+
+    <h3>1. Comportamento delle Lucciole</h3>
+    <p>Ogni lucciola opera inizialmente in modo asincrono. Il "lampeggio" è modellato come una sequenza di messaggi inviati a un display esterno per accendere e spegnere una cella specifica (X,Y).</p>
+    
+    <h3>2. Il Coordinatore come Direttore d'Orchestra</h3>
+    <p>Il sistema non rimane caotico a tempo indefinito. È prevista la figura di un <b>Coordinator</b> che agisce dopo un intervallo di tempo <i>X</i> prefissato:</p>
+    <ul>
+        <li><b>Fase Autonoma</b>: Le 3 lucciole seguono timer interni differenti (drift).</li>
+        <li><b>Impulso di Sincronizzazione</b>: Il coordinatore invia un evento globale (<i>syncNow</i>).</li>
+        <li><b>Fase Sincronizzata</b>: Dopo l'impulso, le lucciole "agganciano" il proprio ritmo a quello dettato dal coordinatore, agendo in fase come un'unica orchestra.</li>
+    </ul>
+
+    <h3>3. Gestione del Tempo Non Bloccante</h3>
+    <p>Per permettere alle lucciole di ricevere l'impulso del coordinatore mentre sono in attesa del proprio prossimo flash, è tassativo non usare delay bloccanti. La soluzione prevede l'uso di <b>transizioni basate su variabili temporali</b> che permettono all'attore di essere interrotto da eventi asincroni.</p>
+
+    <div class="info-box">
+        <b>Dettaglio Tecnico</b>: Il passaggio dal timer naturale al timer del coordinatore deve avvenire in modo fluido, permettendo una transizione (graduale o immediata) verso il nuovo periodo target ricevuto nel messaggio di sync.
+    </div>
+
+    <p>L'architettura prevede un contesto distribuito dove gli attori comunicano tramite eventi.</p>
+    
+    <table style="width:100%" border="1">
+        <tr>
+            <td style="width:30%"><b>Elemento</b></td>
+            <td><b>Logica Funzionale (Il "Come")</b></td>
+        </tr>
+        <tr>
+            <td>Firefly (1,2,3)</td>
+            <td>Ciclo Flash -> Attesa reattiva -> Ricezione Sync -> Cambio Periodo.</td>
+        </tr>
+        <tr>
+            <td>Coordinator</td>
+            <td>Timer di avvio -> Generazione Target -> Broadcast del comando di sincronizzazione.</td>
+        </tr>
+        <tr>
+            <td>GridDisplay</td>
+            <td>Aggiornamento asincrono dei colori delle celle basato sui messaggi dispatch.</td>
+        </tr>
+    </table>
+
+</div>  
+
+<div class="footer">
+    By Passini Andrea email: andrea.passini4@studio.unibo.it <br>
+    <img src="./img/id.jpeg" alt="id_img" width="12%" height="12%" style="margin-top:10px;"> <br>
+    <span>GIT repo:</span> <a href="https://github.com/andreapassini03-ctrl/issLab2026" target="_blank">https://github.com/andreapassini03-ctrl/issLab2026</a> 
+</div> 
+</body>
+</html>

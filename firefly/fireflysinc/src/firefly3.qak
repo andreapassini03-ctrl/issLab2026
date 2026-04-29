@@ -1,0 +1,311 @@
+System firefly
+
+Dispatch cellstate    : cellstate(X,Y,COLOR)
+Event flashEvent      : flashEvent(SOURCE)
+Event syncNow         : syncNow(TARGET)
+Event syncComplete    : syncComplete(TICK)
+
+Context ctxfirefly ip [ host="localhost"  port=8040 ]
+Context ctxgrid    ip [ host="127.0.0.1" port=8050 ]
+
+ExternalQActor griddisplay context ctxgrid
+
+// ===========================================================================
+// coordinator
+// ===========================================================================
+QActor coordinator context ctxfirefly {
+
+	[#
+		var TargetVal = 0L
+		val Y_Dur      = 5000L    
+		val MAX_TIME   = 2147483647L
+	#]
+
+	State s0 initial {
+		println("coordinator | avviato. Sync tra 10s...") color yellow
+		delay 10000
+	}
+	Goto sendSync
+
+	State sendSync {
+		[# 
+			TargetVal = 1000L + Math.abs(java.util.Random().nextLong()) % 4001L 
+			val MsgSync = "syncNow($TargetVal)"
+		#]
+		emit syncNow : $MsgSync
+		println("coordinator | SYNC -> target=$TargetVal ms. Transizione...") color yellow
+		delayVar Y_Dur
+	}
+	Goto sendComplete
+
+	State sendComplete {
+		emit syncComplete : syncComplete(0)
+		println("coordinator | SYNC COMPLETE. Bloccate su target=$TargetVal ms") color yellow
+	}
+	Goto idle
+
+	State idle { }
+	Transition t0
+		whenTimeVar MAX_TIME -> idle
+}
+
+// ===========================================================================
+// firefly1  -  (10,10)  periodo naturale: 1000ms
+// ===========================================================================
+QActor firefly1 context ctxfirefly {
+	[#
+		var X             = 10
+		var Y             = 10
+		var Timer         = 1000L
+		var currentPeriod = 1000L   
+		var targetPeriod  = 0L      
+		val K             = 0.15    
+		val K_trans       = 0.35    
+		var inTransition  = false
+		var MyName        = ""
+	#]
+
+	State s0 initial {
+		[# MyName = name #]
+		println("$MyName | periodo iniziale=1000ms") color magenta
+	}
+	Goto waitToFlash
+
+	State waitToFlash { }
+	Transition t0
+		whenTimeVar Timer        -> flash
+		whenEvent   flashEvent   -> handleFlashObserved
+		whenEvent   syncNow      -> handleSyncNow
+		whenEvent   syncComplete -> handleSyncComplete
+
+	State flash {
+		[#
+			val MOn  = "cellstate($X,$Y,1)"
+			val MOff = "cellstate($X,$Y,0)"
+			val FEv  = "flashEvent($MyName)"
+		#]
+		forward griddisplay -m cellstate : $MOn
+		delay 500
+		forward griddisplay -m cellstate : $MOff
+		emit flashEvent : $FEv
+		[#
+			if (inTransition) {
+				currentPeriod = (currentPeriod * (1.0 - K_trans) + targetPeriod * K_trans).toLong()
+			}
+			Timer = currentPeriod
+		#]
+		println("$MyName | flash -> currentPeriod=$currentPeriod ms") color magenta
+	}
+	Goto waitToFlash
+
+	State handleFlashObserved {
+		onMsg( flashEvent : flashEvent(SOURCE) ) {
+			[#
+				val src = payloadArg(0)
+				if (src != MyName) {
+					Timer = (Timer * (1.0 - K)).toLong()
+					if (Timer < 0L) Timer = 0L
+				}
+			#]
+		}
+	}
+	Goto waitToFlash
+
+	State handleSyncNow {
+		onMsg( syncNow : syncNow(TARGET) ) {
+			[#
+				targetPeriod = payloadArg(0).toLong()
+				inTransition = true
+				Timer        = 100L
+			#]
+			println("$MyName | transizione -> target=$targetPeriod ms") color yellow
+		}
+	}
+	Goto waitToFlash
+
+	State handleSyncComplete {
+		onMsg( syncComplete : syncComplete(V) ) {
+			[#
+				inTransition  = false
+				currentPeriod = targetPeriod
+				Timer         = targetPeriod
+			#]
+			println("$MyName | LOCKED su $currentPeriod ms") color yellow
+		}
+	}
+	Goto waitToFlash
+}
+
+// ===========================================================================
+// firefly2  -  (5,5)  periodo naturale: 3000ms
+// ===========================================================================
+QActor firefly2 context ctxfirefly {
+	[#
+		var X             = 5
+		var Y             = 5
+		var Timer         = 3000L
+		var currentPeriod = 3000L
+		var targetPeriod  = 0L
+		val K             = 0.15
+		val K_trans       = 0.35
+		var inTransition  = false
+		var MyName        = ""
+	#]
+
+	State s0 initial {
+		[# MyName = name #]
+		println("$MyName | periodo iniziale=3000ms") color blue
+	}
+	Goto waitToFlash
+
+	State waitToFlash { }
+	Transition t0
+		whenTimeVar Timer        -> flash
+		whenEvent   flashEvent   -> handleFlashObserved
+		whenEvent   syncNow      -> handleSyncNow
+		whenEvent   syncComplete -> handleSyncComplete
+
+	State flash {
+		[#
+			val MOn  = "cellstate($X,$Y,1)"
+			val MOff = "cellstate($X,$Y,0)"
+			val FEv  = "flashEvent($MyName)"
+		#]
+		forward griddisplay -m cellstate : $MOn
+		delay 500
+		forward griddisplay -m cellstate : $MOff
+		emit flashEvent : $FEv
+		[#
+			if (inTransition) {
+				currentPeriod = (currentPeriod * (1.0 - K_trans) + targetPeriod * K_trans).toLong()
+			}
+			Timer = currentPeriod
+		#]
+		println("$MyName | flash -> currentPeriod=$currentPeriod ms") color blue
+	}
+	Goto waitToFlash
+
+	State handleFlashObserved {
+		onMsg( flashEvent : flashEvent(SOURCE) ) {
+			[#
+				val src = payloadArg(0)
+				if (src != MyName) {
+					Timer = (Timer * (1.0 - K)).toLong()
+					if (Timer < 0L) Timer = 0L
+				}
+			#]
+		}
+	}
+	Goto waitToFlash
+
+	State handleSyncNow {
+		onMsg( syncNow : syncNow(TARGET) ) {
+			[#
+				targetPeriod = payloadArg(0).toLong()
+				inTransition = true
+				Timer        = 100L
+			#]
+			println("$MyName | transizione -> target=$targetPeriod ms") color yellow
+		}
+	}
+	Goto waitToFlash
+
+	State handleSyncComplete {
+		onMsg( syncComplete : syncComplete(V) ) {
+			[#
+				inTransition  = false
+				currentPeriod = targetPeriod
+				Timer         = targetPeriod
+			#]
+			println("$MyName | LOCKED su $currentPeriod ms") color yellow
+		}
+	}
+	Goto waitToFlash
+}
+
+// ===========================================================================
+// firefly3  -  (2,2)  periodo naturale: 5000ms
+// ===========================================================================
+QActor firefly3 context ctxfirefly {
+	[#
+		var X             = 2
+		var Y             = 2
+		var Timer         = 5000L
+		var currentPeriod = 5000L
+		var targetPeriod  = 0L
+		val K             = 0.15
+		val K_trans       = 0.35
+		var inTransition  = false
+		var MyName        = ""
+	#]
+
+	State s0 initial {
+		[# MyName = name #]
+		println("$MyName | periodo iniziale=5000ms") color green
+	}
+	Goto waitToFlash
+
+	State waitToFlash { }
+	Transition t0
+		whenTimeVar Timer        -> flash
+		whenEvent   flashEvent   -> handleFlashObserved
+		whenEvent   syncNow      -> handleSyncNow
+		whenEvent   syncComplete -> handleSyncComplete
+
+	State flash {
+		[#
+			val MOn  = "cellstate($X,$Y,1)"
+			val MOff = "cellstate($X,$Y,0)"
+			val FEv  = "flashEvent($MyName)"
+		#]
+		forward griddisplay -m cellstate : $MOn
+		delay 500
+		forward griddisplay -m cellstate : $MOff
+		emit flashEvent : $FEv
+		[#
+			if (inTransition) {
+				currentPeriod = (currentPeriod * (1.0 - K_trans) + targetPeriod * K_trans).toLong()
+			}
+			Timer = currentPeriod
+		#]
+		println("$MyName | flash -> currentPeriod=$currentPeriod ms") color green
+	}
+	Goto waitToFlash
+
+	State handleFlashObserved {
+		onMsg( flashEvent : flashEvent(SOURCE) ) {
+			[#
+				val src = payloadArg(0)
+				if (src != MyName) {
+					Timer = (Timer * (1.0 - K)).toLong()
+					if (Timer < 0L) Timer = 0L
+				}
+			#]
+		}
+	}
+	Goto waitToFlash
+
+	State handleSyncNow {
+		onMsg( syncNow : syncNow(TARGET) ) {
+			[#
+				targetPeriod = payloadArg(0).toLong()
+				inTransition = true
+				Timer        = 100L
+			#]
+			println("$MyName | transizione -> target=$targetPeriod ms") color yellow
+		}
+	}
+	Goto waitToFlash
+
+	State handleSyncComplete {
+		onMsg( syncComplete : syncComplete(V) ) {
+			[#
+				inTransition  = false
+				currentPeriod = targetPeriod
+				Timer         = targetPeriod
+			#]
+			println("$MyName | LOCKED su $currentPeriod ms") color yellow
+		}
+	}
+	Goto waitToFlash
+}
