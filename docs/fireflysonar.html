@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.4/dist/css/foundation.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.4/dist/js/foundation.min.js" crossorigin="anonymous"></script> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="custom.css">
+    <title>PASSINI ANDREA - Firefly Sync Analysis</title>
+</head>
+
+<body>
+<div id="top">
+    <h1>LABORATORIO DI INGEGNERIA DEI SISTEMI SOFTWARE</h1>
+    <h3>Analisi del Sistema Firefly - Punto B (Sonar Sync)</h3>
+</div>  
+
+<div class="body"> 
+    <h2>Introduction</h2>
+    <p><b>Goal</b>: Analisi e modellazione di un sistema distribuito che simula il comportamento di un gruppo di 3 lucciole, la cui sincronizzazione è governata direttamente da un sensore Sonar di distanza.</p>
+
+    <h2>Requirements</h2>
+    <div class="info-box">
+        Definire un modello qak di un sistema firefly che simula il comportamento di 3 lucciole.
+    </div>
+    <p>In particolare, secondo l'estensione <b>(B)</b> del requisito:</p>
+    <ul>
+        <li>Il sistema è dotato di un <b>Sonar</b>.</li>
+        <li>Quando il sonar rileva un ostacolo a una distanza minore di <b>DMIN</b> (100 cm), le lucciole devono lampeggiare in modo sincronizzato.</li>
+        <li>Quando la distanza dell'ostacolo (ri)supera DMIN, le lucciole tornano a lampeggiare in modo random.</li>
+        <li>Visualizzazione dello stato su griglia.</li>
+    </ul>
+
+    <h2>Requirement analysis</h2>
+    <p>Dall'analisi dei requisiti si identificano i seguenti elementi:</p>
+    <pre>
+- <b>Sonar</b>: Dispositivo di input e logica di controllo per il rilevamento della distanza critica.
+- <b>Sincronizzazione Reattiva</b>: Il passaggio alla modalità sincrona deve essere immediato al rilevamento dell'ostacolo.
+- <b>Ripristino</b>: Ritorno automatico allo stato naturale (periodi differenti) quando l'ostacolo non è più rilevato.
+    </pre>
+
+    <h2>Problem analysis</h2>
+
+    <h3>1. Il Sonar come Logica di Controllo</h3>
+    <p>In questa architettura, il <b>Sonar</b> assume il ruolo di componente attivo che monitora l'ambiente e decide lo stato del sistema:</p>
+    <ul>
+        <li><b>Rilevamento Ostacolo</b> (Dist &lt; DMIN): Il sonar emette l'evento <code>obstacleDetected(TARGET)</code>. Le lucciole reagiscono resettando il timer per allineare la fase e adottare il periodo target.</li>
+        <li><b>Rimozione Ostacolo</b> (Dist &gt; DMIN): Il sonar emette l'evento <code>obstacleClear</code>, permettendo alle lucciole di ripristinare i propri timer naturali.</li>
+    </ul>
+
+    <h3>2. Sincronizzazione Immediata</h3>
+    <p>Per soddisfare il requisito di sincronia immediata, non si utilizzano algoritmi di convergenza graduale. Al segnale del Sonar, la lucciola interrompe l'attesa corrente (grazie a <code>whenTimeVar</code>) e forza un flash istantaneo per allinearsi alle altre.</p>
+
+    <h3>3. Gestione del Tempo Reattiva</h3>
+    <p>L'uso di <b>transizioni temporali variabili</b> (<code>whenTimeVar</code>) è essenziale per garantire che l'evento emesso dal Sonar non venga ignorato fino alla fine del delay naturale della lucciola.</p>
+
+    <div class="info-box">
+        <b>Scelta progettuale</b>: La rimozione del coordinatore centralizza la logica di "switch" nel Sonar, riducendo il numero di attori coinvolti e la latenza di comunicazione tra il rilevamento fisico e l'attuazione del comportamento delle lucciole.
+    </div>
+
+    <p>L'architettura del sistema prevede l'interazione diretta tra il sensore e gli attori lucciola.</p>
+    
+    <table style="width:100%" border="1">
+        <tr>
+            <th style="width:30%">Attore</th>
+            <th>Logica Funzionale</th>
+        </tr>
+        <tr>
+            <td><b>Sonar</b></td>
+            <td>Misura la distanza e funge da "direttore d'orchestra" emettendo eventi di sincronizzazione basati sulla soglia DMIN.</td>
+        </tr>
+        <tr>
+            <td><b>Firefly (1,2,3)</b></td>
+            <td>Entità reattive che alternano stati ON/OFF. Cambiano istantaneamente periodo e fase alla ricezione degli eventi del Sonar.</td>
+        </tr>
+        <tr>
+            <td><b>GridDisplay</b></td>
+            <td>Componente esterno per la visualizzazione dello stato delle celle.</td>
+        </tr>
+    </table>
+
+    <div class="info-box">
+        <b>Link alla Soluzione</b>: 
+        <ul>
+            <li>Codice Sorgente: <a href="https://github.com/andreapassini03-ctrl/issLab2026/tree/main/firefly" target="_blank">GitHub Repository</a></li>
+        </ul>
+    </div>
+</div>  
+
+<div class="footer">
+    By Passini Andrea email: andrea.passini4@studio.unibo.it <br>
+    <img src="./img/id.jpeg" alt="id_img" width="12%" height="12%" style="margin-top:10px;"> <br>
+    <span>GIT repo:</span> <a href="https://github.com/andreapassini03-ctrl/issLab2026" target="_blank">https://github.com/andreapassini03-ctrl/issLab2026</a> 
+</div> 
+</body>
+</html>

@@ -19,7 +19,9 @@
  * [ConwayLife Sprint3](https://andreapassini03-ctrl.github.io/issLab2026/Sprint3.html): evoluzione del sistema in locale usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
 
 
- * [FireFly](https://andreapassini03-ctrl.github.io/issLab2026/firefly.html): Sistema di 3 lucciole che dopo x secondi si coordinano attraverso un evento di un coordinatore.
+ * [FireFly Sincr A](https://andreapassini03-ctrl.github.io/issLab2026/firefly.html): Sistema di 3 lucciole che dopo 10 secondi si coordinano attraverso un evento di un coordinatore.
+
+ * [FireFly Sonar B](https://andreapassini03-ctrl.github.io/issLab2026/fireflysonar.html): Sistema di 3 lucciole che a seconda del movimento del sonar si coordinano oppure no.
 
 
 

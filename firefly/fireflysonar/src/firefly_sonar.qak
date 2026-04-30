@@ -1,0 +1,218 @@
+System firefly
+
+Dispatch cellstate       : cellstate(X,Y,COLOR)
+Event obstacleDetected   : obstacleDetected(DIST)
+Event obstacleClear      : obstacleClear(DIST)
+
+Context ctxfirefly ip [ host="localhost"  port=8040 ]
+Context ctxgrid    ip [ host="127.0.0.1" port=8050 ]
+
+ExternalQActor griddisplay context ctxgrid
+
+// ===========================================================================
+// sonar  --  random walk graduale, DMIN=100cm
+//   Emette obstacleDetected solo al fronte discendente (dist scende < DMIN).
+//   Emette obstacleClear    solo al fronte ascendente  (dist risale >= DMIN).
+// ===========================================================================
+QActor sonar context ctxfirefly { //2000ms sync periodo arbitrario
+
+	[#
+		val DMIN             = 100L
+		val MEASURE_INTERVAL = 1000L
+		val STEP             = 15L
+		var dist             = 150L
+		var lastObstacle     = false
+	#]
+
+	State s0 initial {
+		println("sonar | DMIN=$DMIN cm  step=+-$STEP cm") color yellow
+	}
+	Goto measure
+
+	State measure {
+		delayVar MEASURE_INTERVAL
+	}
+	Goto checkDistance
+
+	State checkDistance {
+		[#
+			val delta = (Math.random() * (STEP * 2 + 1)).toLong() - STEP
+			dist = (dist + delta).coerceIn(0L, 200L)
+		#]
+		println("sonar | dist=$dist cm") color yellow
+	}
+	Goto evalTransition
+
+	State evalTransition {
+		if [# !lastObstacle && dist < DMIN #] {
+			[# lastObstacle = true #]
+			emit obstacleDetected : obstacleDetected(0)
+			println("sonar | *** OSTACOLO  dist=$dist < DMIN=$DMIN ***") color red
+		}
+		if [# lastObstacle && dist >= DMIN #] {
+			[# lastObstacle = false #]
+			emit obstacleClear : obstacleClear(0)
+			println("sonar | --- CLEAR  dist=$dist >= DMIN=$DMIN ---") color green
+		}
+	}
+	Goto measure
+}
+
+// ===========================================================================
+// firefly1  --  cella (10,10)  periodo naturale: 1000ms
+// ===========================================================================
+QActor firefly1 context ctxfirefly {
+
+	[#
+		var X           = 10
+		var Y           = 10
+		var Timer       = 1000L
+		val NATURAL     = 1000L
+		val SYNC_PERIOD = 2000L
+		var inSync      = false
+	#]
+
+	State s0 initial {
+		println("firefly1 | periodo naturale=$NATURAL ms") color magenta
+	}
+	Goto waitToFlash
+
+	State waitToFlash { }
+	Transition t0
+		whenTimeVar Timer            -> flash
+		whenEvent   obstacleDetected -> handleObstacleDetected
+		whenEvent   obstacleClear    -> handleObstacleClear
+
+	State flash {
+		forward griddisplay -m cellstate : cellstate($X,$Y,1)
+		delay 500
+		forward griddisplay -m cellstate : cellstate($X,$Y,0)
+		[# Timer = if (inSync) SYNC_PERIOD else NATURAL #]
+		println("firefly1 | flash -> period=$Timer ms") color magenta
+	}
+	Goto waitToFlash
+
+	State handleObstacleDetected {
+		[#
+			inSync = true
+			Timer  = SYNC_PERIOD
+		#]
+		println("firefly1 | OSTACOLO -> SYNC $SYNC_PERIOD ms") color red
+	}
+	Goto waitToFlash
+
+	State handleObstacleClear {
+		[#
+			inSync = false
+			Timer  = NATURAL
+		#]
+		println("firefly1 | CLEAR -> $NATURAL ms") color magenta
+	}
+	Goto waitToFlash
+}
+
+// ===========================================================================
+// firefly2  --  cella (5,5)  periodo naturale: 3000ms
+// ===========================================================================
+QActor firefly2 context ctxfirefly {
+
+	[#
+		var X           = 5
+		var Y           = 5
+		var Timer       = 3000L
+		val NATURAL     = 3000L
+		val SYNC_PERIOD = 2000L 
+		var inSync      = false
+	#]
+
+	State s0 initial {
+		println("firefly2 | periodo naturale=$NATURAL ms") color blue
+	}
+	Goto waitToFlash
+
+	State waitToFlash { }
+	Transition t0
+		whenTimeVar Timer            -> flash
+		whenEvent   obstacleDetected -> handleObstacleDetected
+		whenEvent   obstacleClear    -> handleObstacleClear
+
+	State flash {
+		forward griddisplay -m cellstate : cellstate($X,$Y,1)
+		delay 500
+		forward griddisplay -m cellstate : cellstate($X,$Y,0)
+		[# Timer = if (inSync) SYNC_PERIOD else NATURAL #]
+		println("firefly2 | flash -> period=$Timer ms") color blue
+	}
+	Goto waitToFlash
+
+	State handleObstacleDetected {
+		[#
+			inSync = true
+			Timer  = SYNC_PERIOD
+		#]
+		println("firefly2 | OSTACOLO -> SYNC $SYNC_PERIOD ms") color red
+	}
+	Goto waitToFlash
+
+	State handleObstacleClear {
+		[#
+			inSync = false
+			Timer  = NATURAL
+		#]
+		println("firefly2 | CLEAR -> $NATURAL ms") color blue
+	}
+	Goto waitToFlash
+}
+
+// ===========================================================================
+// firefly3  --  cella (2,2)  periodo naturale: 5000ms
+// ===========================================================================
+QActor firefly3 context ctxfirefly {
+
+	[#
+		var X           = 2
+		var Y           = 2
+		var Timer       = 5000L
+		val NATURAL     = 5000L
+		val SYNC_PERIOD = 2000L
+		var inSync      = false
+	#]
+
+	State s0 initial {
+		println("firefly3 | periodo naturale=$NATURAL ms") color green
+	}
+	Goto waitToFlash
+
+	State waitToFlash { }
+	Transition t0
+		whenTimeVar Timer            -> flash
+		whenEvent   obstacleDetected -> handleObstacleDetected
+		whenEvent   obstacleClear    -> handleObstacleClear
+
+	State flash {
+		forward griddisplay -m cellstate : cellstate($X,$Y,1)
+		delay 500
+		forward griddisplay -m cellstate : cellstate($X,$Y,0)
+		[# Timer = if (inSync) SYNC_PERIOD else NATURAL #]
+		println("firefly3 | flash -> period=$Timer ms") color green
+	}
+	Goto waitToFlash
+
+	State handleObstacleDetected {
+		[#
+			inSync = true
+			Timer  = SYNC_PERIOD
+		#]
+		println("firefly3 | OSTACOLO -> SYNC $SYNC_PERIOD ms") color red
+	}
+	Goto waitToFlash
+
+	State handleObstacleClear {
+		[#
+			inSync = false
+			Timer  = NATURAL
+		#]
+		println("firefly3 | CLEAR -> $NATURAL ms") color green
+	}
+	Goto waitToFlash
+}
