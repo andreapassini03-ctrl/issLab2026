@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.4/dist/css/foundation.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.4/dist/js/foundation.min.js" crossorigin="anonymous"></script> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="custom.css">
+    <title>PASSINI ANDREA - Firefly Sync Analysis</title>
+</head>
+
+<body>
+<div id="top">
+    <h1>LABORATORIO DI INGEGNERIA DEI SISTEMI SOFTWARE</h1>
+    <h3>Analisi del Sistema Firefly</h3>
+</div>  
+
+<div class="body"> 
+    <h2>Introduction</h2>
+    <p><b>Goal</b>: Costruire un sistema software che comanda un Differential Drive Robot (DDR)</p>
+
+    <h2>Requirements</h2>
+    <div class="info-box">
+        Costruire un sistema software che comanda un Differential Drive Robot (DDR) in modo che, 
+        partendo dalla posizione iniziale HOME, il robot si sposti lungo il perimetro di una stanza rettangolare vuota. 
+        Il DDR si deve fermare quando tornato in HOME.
+
+        Il DDR è anche sensibile ai dati rilevati da un Radar.
+        Quando il Radar rileva un 'intruso' a una distanza minore di una distanza prefissata ``DMIN``:
+        
+        - se il DDR si sta muovendo , il DDR si ferma fino a che il Radar non rileva più un 'intruso' così vicino 
+        - se il DDR è fermo in HOME, il DDR ruota su sè stesso fino a che un 'intruso' così vicino scompare
+    </div>
+
+    <h2>Requirement analysis</h2>
+    <p>
+        DDR -> Il robot è modellato come un QActor, in quanto deve essere in grado di eseguire azioni e reagire ad eventi esterni in modo proattivo.
+        Perimetro -> insieme di lati di un'area rettangolare, modellato come due variabili intere positive che rappresentano la base e l'altezza dell'area
+        HOME -> posizione iniziale del DDR, rappresentata da una coppia di coordinate intere (x,y) >= 0
+        Radar -> Il radar è modellato come un QActor, che simula la presenza di Intrusi nell'Area e avvisa il DDR in caso siano ad una distanza minore di DMIN.
+        Intruso -> modellato come una coppia di coordinate intere (x,y) >= 0 che rappresentano la posizione dell'intruso all'interno dell'Area
+        DMIN -> distanza minima positiva a cui il Radar segnala al DDR presenza di un intruso
+    </p>
+
+</div>  
+
+<div class="footer">
+    By Passini Andrea email: andrea.passini4@studio.unibo.it <br>
+    <img src="./img/id.jpeg" alt="id_img" width="12%" height="12%" style="margin-top:10px;"> <br>
+    <span>GIT repo:</span> <a href="https://github.com/andreapassini03-ctrl/issLab2026" target="_blank">https://github.com/andreapassini03-ctrl/issLab2026</a> 
+</div> 
+</div> 
+
+</body>
+</html>
