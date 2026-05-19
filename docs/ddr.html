@@ -25,72 +25,76 @@
         partendo dalla posizione iniziale HOME, il robot si sposti lungo il perimetro di una stanza rettangolare vuota. 
         Il DDR si deve fermare quando tornato in HOME.
 
+        <br>
+        <br>
         Il DDR è anche sensibile ai dati rilevati da un Radar.
-        Quando il Radar rileva un 'intruso' a una distanza minore di una distanza prefissata ``DMIN``:
+        Quando il Radar rileva un 'intruso' a una distanza minore di una distanza prefissata "DMIN":
         
-        - se il DDR si sta muovendo , il DDR si ferma fino a che il Radar non rileva più un 'intruso' così vicino 
-        - se il DDR è fermo in HOME, il DDR ruota su sè stesso fino a che un 'intruso' così vicino scompare
+        <br>
+        <br>- se il DDR si sta muovendo , il DDR si ferma fino a che il Radar non rileva più un 'intruso' così vicino 
+        <br>- se il DDR è fermo in HOME, il DDR ruota su sè stesso fino a che un 'intruso' così vicino scompare
     </div>
 
     <h2>Requirement analysis</h2>
-    <pre>
+    <p>
         
         <br>
-        ROOM -> Dopo un analisi con il committente risulta quindi naturale andare a rappresentare la stanza come una griglia, dove ogni cella sarà un'unità robotica.
-        Viene modellata quindi come una griglia rettangolare di base b e altezza h di unità robotiche, b >= 1 unità robotica, h >= 1 unità robotica, in modo che il DDR possa muoversi lungo il perimetro senza uscire dai confini. 
-        Nota: Non usiamo i metri ma usiamo unità robotiche (lato del DDR) per semplificare la modellazione e l'implementazione del sistema.
+        <b>ROOM</b> -> Dopo un analisi con il committente risulta quindi naturale andare a rappresentare la stanza come una griglia, dove ogni cella sarà un'unità robotica.
+        La stanza viene modellata quindi come una griglia rettangolare di base b e altezza h unità robotiche, dove b >= 1 unità robotica, h >= 1 unità robotica, in modo che il DDR possa muoversi lungo il perimetro senza uscire dai confini. 
+        <br>
+        <i>Nota: Non usiamo i metri ma usiamo unità robotiche per semplificare la modellazione e l'implementazione del sistema.</i>
 
-        HOME_DDR -> è un area di 1 unità robotica in grado di contenere il robot. Ovvero è una cella predefinta all'interno della griglia, 
-        in modo che il DDR possa muoversi all'interno di essa senza uscire dai confini.
+        <br><br>
+        <b>HOME</b> -> è un area quadrata di 1 unità robotica in grado di contenere il robot. Ovvero è la cella predefinta della griglia, dalla quale partirà il DDR.
 
         <br>
         <pre>
-            [# 
-                data class RoomConfiguration(
-                    val width: Double, 
-                    val height: Double, 
-                    val cellSideinMt: Double
-                ) {
-                    val totalWidthinMt: Double = width * cellSideinMt
-                    val totalHeightinMt: Double = height * cellSideinMt
-                    val homePoint: PointInGrid = PointInGrid(0, 0)
-                }
+    [# 
+        data class RoomConfiguration( <i>// rappresenta la configurazione della stanza</i>
+            val width: Double, 
+            val height: Double, 
+            val cellSideinMt: Double <i>// lunghezza del lato di una cella in metri</i>
+        ) {
+            val totalWidthinMt: Double = width * cellSideinMt
+            val totalHeightinMt: Double = height * cellSideinMt
+            val homePoint: PointInGrid = PointInGrid(0, 0)
+        }
 
-                data class PointInGrid(val x: Int, val y: Int)
-            #]
+        data class PointInGrid(val x: Int, val y: Int)
+    #]
         </pre>
 
         <br>
-        Radar -> Il radar è modellato come un <a href="https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#page=186" target="_blank">QActor</a>.
+        <b>RADAR</b> -> Il radar è modellato come un <a href="https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#page=186" target="_blank">QActor</a>.
         Esso è un'entità proattiva che controlla i dintorni del DDR rilevando la distanza degli intrusi.
         Questo attore è quindi una rappresentazione del fatto che il DDR è dotato di un sensore che gli permette di rilevare la presenza di intrusi che si trovano ad una distanza inferiore di DMIN.
         E' necessario formalizzare questi concetti, il radar comunica con il DDR emettendo un evento.
         <br><br>
         <pre>
-            QActor Radar context ctxddr {
-                [#
-                    distanza_intruso = 0; // variabile che rappresenta la distanza dell'intruso più vicino rilevato dal radar
-                    // Assumiamo che veda solo davanti a se
-                #]
-                State s0 initial {
-                    println("$name | attivo") color green
-                }
-                Goto emitDistance
-                
-                State emitDistance {
-                    emit infoRadar : distance(distanza_intruso)
-                    // Evento: distance(distanza_intruso) che rappresenta la distanza dell'intruso rilevato dal radar.
-                } 
-            } 
+    QActor Radar context ctxddr {
+        [#
+            distanza_intruso = 0; <i>// variabile che rappresenta la distanza dell'intruso più vicino rilevato dal radar</i>
+            <i>// Assumiamo per semplificità che il radar veda solo davanti a se e non giri.</i>
+        #]
+        State s0 initial {
+            println("$name | attivo") color green
+        }
+        Goto emitDistance
+        
+        State emitDistance {
+            emit infoRadar : distance(distanza_intruso)
+            <i>// Evento: distance(distanza_intruso) che rappresenta la distanza dell'intruso rilevato dal radar.</i>
+        } 
+    } 
         </pre>
 
         <br>
-        <a href="https://github.com/anatali/issLab2026/tree/main/it.unibo.virtualRobot2026">DDR</a> -> Dai requisiti si evince che il DDR è proattivo e risponde a comandi di movimento (avanti, indietro, destra, sinistra) e a comandi di stop.
-        Parlando con il committente si arriva alla conclusione che il <strong>DDR</strong> è fornito dal
-        committente stesso ed è inscrivibile in un quadrato.
+        <a href="https://github.com/anatali/issLab2026/tree/main/it.unibo.virtualRobot2026"><b>DDR</b></a> -> Dai requisiti si evince che il DDR è proattivo e risponde a comandi di movimento (avanti, indietro, destra, sinistra) e a comandi di stop.
+        <br>Dopo un confronto con il committente si arriva alla conclusione che il DDR è fornito dal
+        committente stesso ed è inscrivibile in un quadrato di una unità robotica.
         E' possibile comunicare con il DDR con http su 8090 sincrona oppure websocket su 8091 asincrona a 2 vie. 
 
-    </pre>
+    </p>
 </div>  
 
 <div class="footer">
