@@ -23,7 +23,7 @@
 
  * [FireFly Sonar B](https://andreapassini03-ctrl.github.io/issLab2026/fireflysonar.html): Sistema di 3 lucciole che a seconda del movimento del sonar si coordinano oppure no.
 
- * [DDR](https://andreapassini03-ctrl.github.io/issLab2026/ddr.html): Prima consegna Ddr.
+ * [DDR](https://andreapassini03-ctrl.github.io/issLab2026/ddr.html): Prima consegna Ddr: Costruire un sistema software che comanda un Differential Drive Robot
 
 
 
